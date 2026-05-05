@@ -89,14 +89,6 @@
             border-radius: 12px;
             font-size: 0.8rem;
         }
-        .regra-destaque {
-            background: #e8f4e8;
-            border-left: 3px solid #2e7d32;
-            padding: 6px 10px;
-            margin: 6px 0;
-            border-radius: 8px;
-            font-weight: bold;
-        }
         .input-area {
             background: white;
             padding: 16px 20px;
@@ -138,7 +130,7 @@
     <div class="header">
         <h1>⚖️ Núcleo ATP — Distribuição Jurídica</h1>
         <p>Controladoria JUK · 57 clientes mapeados (29 A + 24 B + 4 Maite)</p>
-        <div class="badge">📋 Anyelle: orientação publicidade | Franquia/Vigilância → Theivison</div>
+        <div class="badge">📋 Anyelle: orientação publicidade | Contratos: Theivison (complexo) / Brunna e Wagner (simples) | Franquia/Vigilância → Theivison</div>
     </div>
     <div class="chat-area" id="chatArea">
         <div class="message bot-message">
@@ -147,26 +139,26 @@
                 <strong>⚡ Distribuição instantânea</strong><br/><br/>
                 Digite o nome do cliente e a demanda.<br/><br/>
                 <strong>Exemplos:</strong><br/>
+                • <em>"CLINICA GALLI contrato de comodato"</em><br/>
                 • <em>"LA SANTE analise redes sociais"</em><br/>
-                • <em>"AMANDA E GROVER orientação"</em><br/>
                 • <em>"DR. M CLINIC resolução com paciente"</em><br/>
-                • <em>"GABRIELA RISSI contrato compra e venda"</em><br/>
-                ✅ Retorno: <strong>Cliente + Grupo + Advogado + Regra aplicada + Passo a passo</strong>
+                • <em>"GABRIELA RISSI contrato complexo"</em><br/>
+                ✅ Retorno: <strong>Cliente + Grupo + Advogado + Regra aplicada</strong>
             </div>
         </div>
     </div>
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Ex: LA SANTE analise redes sociais" autocomplete="off">
+        <input type="text" id="userInput" placeholder="Ex: CLINICA GALLI contrato de comodato" autocomplete="off">
         <button id="sendBtn">Distribuir →</button>
     </div>
     <div class="footer-note">
-        📌 57 clientes assessorados | Regra 1 (Continuidade) | Regra 2 (Grupo fixo) | Regra 3 (Anyelle protegida)
+        📌 57 clientes | Contrato simples (comodato, locação, compra, venda) → Grupo A: Brunna/Wagner | Grupo B: Monique | Contrato complexo → Theivison (A) / Gabriela (B)
     </div>
 </div>
 
 <script>
     // ==============================================================
-    // NORMALIZAÇÃO DE TEXTO
+    // NORMALIZAÇÃO
     // ==============================================================
     function normalizarTexto(texto) {
         return texto.toLowerCase()
@@ -180,10 +172,12 @@
     // BASE DE DADOS COMPLETA DOS 57 CLIENTES
     // ==============================================================
     const clientesDatabase = [
+        // MAITE (4)
         { nome: "GRUPO GABRIELLE TEIXEIRA - ESTETICA AVANCADA LTDA", grupo: "Maite", keywords: ["grupo gabrielle", "gabrielle teixeira", "gabrielle"] },
         { nome: "LIFE CLINIC ODONTOLOGICA LTDA", grupo: "Maite", keywords: ["life clinic", "life"] },
         { nome: "AMANDA E GROVER SERVICOS MEDICOS LTDA", grupo: "Maite", keywords: ["amanda grover", "amanda e grover", "amanda", "grover"] },
         { nome: "AMIGOS DA ESTETICA SAUDE E BEM-ESTAR", grupo: "Maite", keywords: ["amigos da estetica", "amigos"] },
+        // GRUPO A (29)
         { nome: "CLÍNICA NACIONAL DE REABILITACAO OROFACIAL LTDA", grupo: "A", keywords: ["clinica nacional", "nacional reabilitacao"] },
         { nome: "LA SANTE", grupo: "A", keywords: ["la sante", "sante"] },
         { nome: "BC BOUTIQUE DO PAO DE LO LTDA", grupo: "A", keywords: ["bc boutique", "pao de lo"] },
@@ -212,6 +206,7 @@
         { nome: "PJ SERVICOS DE SAUDE LTDA", grupo: "A", keywords: ["pj servicos"] },
         { nome: "MARIANA BARBOSA GEORGES SOCIEDADE SIMPLES", grupo: "A", keywords: ["mariana barbosa"] },
         { nome: "ESPACO FACIAL GESTAO DE MARCAS LTDA", grupo: "A", keywords: ["espaco facial"] },
+        // GRUPO B (24)
         { nome: "IRCA CLINICA DE ESTETICA LTDA", grupo: "B", keywords: ["irca"] },
         { nome: "INSTITUTO KAREN GOMES ODONTOLOGIA LTDA", grupo: "B", keywords: ["karen gomes", "instituto karen"] },
         { nome: "VIVA SPACE INSTITUTO SAUDE INTEGRADA LTDA", grupo: "B", keywords: ["viva space"] },
@@ -288,60 +283,76 @@
     // ==============================================================
     function isEspecialidadeAnyelle(texto) {
         const t = texto.toLowerCase();
-        const motivos = [];
         
-        if (/publicidade|redes sociais|postagens|instagram|facebook|análise de redes|analise redes|marketing digital|conteúdo digital|sugestão de post/i.test(t)) {
-            motivos.push("📢 Orientação sobre publicidade/redes sociais (Manual p.4)");
-            return { ok: true, motivo: motivos.join(", ") };
+        // Demandas reativas que Anyelle FAZ (Manual p.4)
+        const anyelleKeywords = [
+            /publicidade|redes sociais|postagens|instagram|facebook|análise de redes|analise redes|marketing digital|conteúdo digital|sugestão de post/i,
+            /termo de consentimento|termo de uso de imagem|termos diversos/i,
+            /contrato de curso|contrato de paciente|contrato de mentoria/i,
+            /aditivo simples|pack de documentos|orientação simples/i
+        ];
+        
+        for (let regex of anyelleKeywords) {
+            if (regex.test(t)) return true;
         }
-        if (/termo de consentimento|termo de uso de imagem/i.test(t)) {
-            motivos.push("📝 Termos de consentimento/uso de imagem (Manual p.4)");
-            return { ok: true, motivo: motivos.join(", ") };
-        }
-        if (/contrato de curso|contrato de paciente|contrato de mentoria/i.test(t)) {
-            motivos.push("📄 Contratos de curso/paciente/mentoria (Manual p.4)");
-            return { ok: true, motivo: motivos.join(", ") };
-        }
-        if (/aditivo simples|termos diversos|pack de documentos|orientação simples/i.test(t)) {
-            motivos.push("📑 Aditivos simples, termos diversos, pack de documentos (Manual p.4)");
-            return { ok: true, motivo: motivos.join(", ") };
-        }
-        return { ok: false, motivo: "" };
+        return false;
     }
     
     // ==============================================================
-    // TIPO DE DEMANDA
+    // TIPO DE DEMANDA (com distinção entre contrato simples e complexo)
     // ==============================================================
     function identificarTipoDemanda(texto) {
         const t = texto.toLowerCase();
-        if (/publicidade|redes sociais|postagens|instagram|facebook|analise de redes|marketing/i.test(t)) return "orientacao";
-        if (/vigilância|franquia/i.test(t)) return "vigilancia_franquia";
-        if (/resolução paciente|problema paciente|paciente grave|paciente simples|paciente complicado|resolução com paciente/i.test(t)) return "resolucao_paciente";
-        if (/contrato compra|contrato venda|contrato locação|contrato aluguel/i.test(t)) return "contrato_simples";
-        if (/contrato complexo|societário|parceria/i.test(t)) return "contrato_complexo";
-        if (/cobrança|execução|dívida/i.test(t)) return "cobranca";
-        if (/judicial|petição|jec|processo/i.test(t)) return "judicial_simples";
-        if (/orientação/i.test(t)) return "orientacao";
+        
+        // Publicidade/redes sociais
+        if (/publicidade|redes sociais|postagens|instagram|facebook|analise de redes|marketing|orientação publicidade/i.test(t)) return "orientacao";
+        
+        // Vigilância/Franquia
+        if (/vigilância|vigilancia|franquia/i.test(t)) return "vigilancia_franquia";
+        
+        // Resolução de paciente
+        if (/resolução paciente|problema paciente|paciente grave|paciente simples|paciente complicado|resolução com paciente|paciente reclamando/i.test(t)) return "resolucao_paciente";
+        
+        // CONTRATO COMPLEXO (societário, parceria, joint venture, franquia - mas franquia já tratada)
+        if (/contrato complexo|societário|parceria|joint venture|holding|incorporação|cisão|fusão|acordo de acionistas/i.test(t)) return "contrato_complexo";
+        
+        // CONTRATO SIMPLES (comodato, locação, compra, venda, aluguel, cessão, etc.)
+        if (/contrato|comodato|locação|aluguel|compra|venda|cessão|doação|permuta|comodato/i.test(t)) return "contrato_simples";
+        
+        // Cobrança
+        if (/cobrança|cobranca|execução|dívida|divida|inadimplência|inadimplencia|mora/i.test(t)) return "cobranca";
+        
+        // Judicial simples
+        if (/petição|jec|juizado|inicial|contestação|recurso|apelação|agravo|embargos/i.test(t)) return "judicial_simples";
+        
+        // Judicial complexo
+        if (/judicial complexo|ação complexa|risco grave|liminar|tutela|mandado de segurança|ms|agravo de instrumento/i.test(t)) return "judicial_complexo";
+        
+        // Processo ético
+        if (/processo ético|crm|cro|crbm|conselho|infração ética|denúncia ética/i.test(t)) return "processo_etico";
+        
+        // Orientação simples
+        if (/orientação|orientação simples|esclarecimento|dúvida/i.test(t)) return "orientacao";
+        
         return "outros";
     }
     
     function detectarGravidadePaciente(texto) {
         const t = texto.toLowerCase();
-        if (/grave|gravíssimo|complicado|risco|internação|emergência/i.test(t)) return "grave";
+        if (/grave|gravíssimo|complicado|risco|internação|emergência|hospitalar|crítico|difícil/i.test(t)) return "grave";
         return "simples";
     }
     
     // ==============================================================
-    // DISTRIBUIÇÃO COM REGRAS EXPLICITAS
+    // DISTRIBUIÇÃO COM REGRAS EXPLICITAS (CORRIGIDA)
     // ==============================================================
     function distribuirAssessorado(clienteInfo, tipoDemanda, texto, regras) {
         const grupo = clienteInfo.grupo;
         
         // REGRA 3: ANYELLE PROTEGIDA (prioridade máxima)
-        const anyelleCheck = isEspecialidadeAnyelle(texto);
-        if (anyelleCheck.ok) {
-            regras.push(`🛡️ REGRA 3 (Anyelle protegida): Demanda identificada como especialidade exclusiva de Anyelle conforme Manual p.4`);
-            regras.push(`   → Motivo: ${anyelleCheck.motivo}`);
+        if (isEspecialidadeAnyelle(texto)) {
+            regras.push(`🛡️ REGRA 3 (Anyelle protegida): Demanda está na especialidade exclusiva de Anyelle conforme Manual p.4`);
+            regras.push(`   → Anyelle faz: orientações publicidade, termos de consentimento, contratos de curso/paciente/mentoria, termos diversos, aditivos simples`);
             regras.push(`   → Anyelle NÃO recebe demandas fora desta lista. Como está dentro, vai para ANYELLE.`);
             return "ANYELLE (Assessoria Ativa + Demandas Reativas Específicas)";
         }
@@ -350,50 +361,76 @@
         if (tipoDemanda === "vigilancia_franquia") {
             regras.push(`🚨 EXCEÇÃO À REGRA 2: Vigilância Sanitária ou Franquia identificada`);
             regras.push(`   → Manual p.3 e p.5: Nestes casos, SEMPRE vai para THEIVISON, independente do grupo do cliente`);
-            regras.push(`   → Cliente é Grupo ${grupo}, mas regra especial se sobrepõe.`);
             return "THEIVISON (Senior Grupo A)";
         }
         
         // CLIENTE MAITE
         if (grupo === "Maite") {
             regras.push(`👩‍⚖️ Cliente da Maite (Manual p.2 e p.7): Clientes próprios da coordenação`);
-            regras.push(`   → Toda demanda destes 4 clientes vai diretamente para MAITE.`);
+            regras.push(`   → Toda demanda destes clientes vai diretamente para MAITE.`);
             return "MAITE (Coordenação)";
         }
         
         // REGRA 2: Cliente fica no grupo dele
         regras.push(`📂 REGRA 2 (Cliente fica no grupo): Cliente do Grupo ${grupo} → demanda permanece no Grupo ${grupo}`);
         
-        // GRUPO A
+        // ==============================================================
+        // GRUPO A - Regras corrigidas!
+        // ==============================================================
         if (grupo === "A") {
+            // Resolução de paciente
             if (tipoDemanda === "resolucao_paciente") {
                 const gravidade = detectarGravidadePaciente(texto);
                 if (gravidade === "grave") {
-                    regras.push(`🩺 Theivison: Paciente GRAVE/GRAVÍSSIMO no Grupo A (Manual p.4 - Theivison faz resolução de paciente gravíssimo)`);
+                    regras.push(`🩺 Theivison: Paciente GRAVE no Grupo A (Manual p.4 - Theivison faz resolução de paciente gravíssimo)`);
                     return "THEIVISON";
                 } else {
                     regras.push(`🩺 Brunna: Resolução de paciente SIMPLES/MÉDIO no Grupo A (Manual p.4 - Brunna faz resolução de paciente simples e médio)`);
                     return "BRUNNA";
                 }
             }
-            if (tipoDemanda === "contrato_simples" || tipoDemanda === "contrato_complexo") {
-                regras.push(`📄 Theivison: Contrato no Grupo A (Theivison é especialista em contratos complexos e também cuida de contratos no grupo)`);
+            
+            // CONTRATO COMPLEXO (Theivison)
+            if (tipoDemanda === "contrato_complexo") {
+                regras.push(`📄 Theivison: CONTRATO COMPLEXO no Grupo A (Manual p.4 - Theivison é especialista em contratos complexos)`);
                 return "THEIVISON";
             }
+            
+            // CONTRATO SIMPLES (Brunna ou Wagner)
+            if (tipoDemanda === "contrato_simples") {
+                regras.push(`📄 CONTRATO SIMPLES no Grupo A → BRUNNA ou WAGNER (Manual p.4: Theivison não faz contratos simples, Brunna e Wagner sim)`);
+                regras.push(`   → Sugestão: alternar entre Brunna e Wagner para equilibrar carga.`);
+                return "BRUNNA ou WAGNER (alternar carga)";
+            }
+            
+            // Cobrança
             if (tipoDemanda === "cobranca") {
-                regras.push(`💰 Wagner ou Brunna: Cobranças no Grupo A (Manual p.4 - Ambos fazem cobranças, equilibrar carga)`);
+                regras.push(`💰 Cobrança no Grupo A → WAGNER ou BRUNNA (Manual p.4 - Ambos fazem cobranças)`);
                 return "WAGNER ou BRUNNA";
             }
+            
+            // Judicial simples
             if (tipoDemanda === "judicial_simples") {
-                regras.push(`⚖️ Wagner: Judicial simples, petições, JEC no Grupo A (Manual p.4 - Wagner faz petições iniciais e automações)`);
+                regras.push(`⚖️ Judicial simples no Grupo A → WAGNER (Manual p.4 - Wagner faz petições iniciais e automações)`);
                 return "WAGNER";
             }
+            
+            // Judicial complexo
+            if (tipoDemanda === "judicial_complexo" || tipoDemanda === "processo_etico") {
+                regras.push(`⚖️ Judicial complexo/Processo ético no Grupo A → THEIVISON`);
+                return "THEIVISON";
+            }
+            
+            // Fallback
             regras.push(`🎯 Theivison (fallback): Demanda geral no Grupo A, encaminhar ao sênior Theivison.`);
             return "THEIVISON";
         }
         
-        // GRUPO B
+        // ==============================================================
+        // GRUPO B - Regras corrigidas!
+        // ==============================================================
         if (grupo === "B") {
+            // Resolução de paciente
             if (tipoDemanda === "resolucao_paciente") {
                 const gravidade = detectarGravidadePaciente(texto);
                 if (gravidade === "grave") {
@@ -404,18 +441,39 @@
                     return "MONIQUE";
                 }
             }
-            if (tipoDemanda === "contrato_simples" || tipoDemanda === "contrato_complexo") {
-                regras.push(`📄 Gabriela: Contrato no Grupo B (Manual p.4 - Gabriela é especialista em contratos complexos)`);
+            
+            // CONTRATO COMPLEXO (Gabriela)
+            if (tipoDemanda === "contrato_complexo") {
+                regras.push(`📄 Gabriela: CONTRATO COMPLEXO no Grupo B (Manual p.4 - Gabriela é especialista em contratos complexos)`);
                 return "GABRIELA";
             }
+            
+            // CONTRATO SIMPLES (Monique também faz!)
+            if (tipoDemanda === "contrato_simples") {
+                regras.push(`📄 CONTRATO SIMPLES no Grupo B → MONIQUE (Manual p.4 - Monique faz contratos médios e complexos, também pode fazer simples)`);
+                regras.push(`   → Contrato simples pode ir para Monique; contrato complexo vai para Gabriela.`);
+                return "MONIQUE";
+            }
+            
+            // Cobrança
             if (tipoDemanda === "cobranca") {
-                regras.push(`💰 Monique: Cobranças no Grupo B (Manual p.4 - Monique faz cobranças e demandas extrajudiciais)`);
+                regras.push(`💰 Cobrança no Grupo B → MONIQUE (Manual p.4 - Monique faz cobranças e extrajudicial)`);
                 return "MONIQUE";
             }
-            if (tipoDemanda === "judicial_simples") {
-                regras.push(`⚖️ Monique: Judicial no Grupo B (Manual p.4 - Monique faz judicial médio e complexo no Grupo B)`);
+            
+            // Judicial
+            if (tipoDemanda === "judicial_simples" || tipoDemanda === "judicial_complexo") {
+                regras.push(`⚖️ Judicial no Grupo B → MONIQUE (Manual p.4 - Monique faz judicial médio e complexo no Grupo B)`);
                 return "MONIQUE";
             }
+            
+            // Processo ético
+            if (tipoDemanda === "processo_etico") {
+                regras.push(`⚖️ Processo ético no Grupo B → GABRIELA ou MONIQUE`);
+                return "GABRIELA ou MONIQUE";
+            }
+            
+            // Fallback
             regras.push(`🎯 Gabriela (fallback): Demanda geral no Grupo B, utilizar a senioridade da Gabriela.`);
             return "GABRIELA";
         }
@@ -423,28 +481,42 @@
         return "Consultar Maite";
     }
     
+    // ==============================================================
+    // DISTRIBUIÇÃO PARA ATOS ISOLADOS
+    // ==============================================================
     function distribuirAtoIsolado(tipoDemanda, texto, regras) {
         regras.push(`📋 TABELINHA DE ATOS ISOLADOS (Manual p.6): Cliente não está na lista dos 57 assessorados`);
-        const anyelleCheck = isEspecialidadeAnyelle(texto);
-        if (anyelleCheck.ok) {
-            regras.push(`   → Especialidade Anyelle detectada: ${anyelleCheck.motivo}`);
+        
+        if (isEspecialidadeAnyelle(texto)) {
+            regras.push(`   → Especialidade Anyelle → ANYELLE`);
             return "ANYELLE";
         }
-        if (tipoDemanda === "contrato_simples") {
-            regras.push(`   → Contrato simples → GABRIELA (especialista em contratos)`);
-            return "GABRIELA";
+        
+        switch(tipoDemanda) {
+            case "contrato_simples":
+                regras.push(`   → Contrato simples → GABRIELA`);
+                return "GABRIELA";
+            case "contrato_complexo":
+                regras.push(`   → Contrato complexo → GABRIELA`);
+                return "GABRIELA";
+            case "resolucao_paciente":
+                const gravidade = detectarGravidadePaciente(texto);
+                if (gravidade === "grave") {
+                    regras.push(`   → Paciente grave → THEIVISON (Grupo A) ou GABRIELA (Grupo B)`);
+                    return "THEIVISON ou GABRIELA";
+                }
+                regras.push(`   → Resolução paciente simples → BRUNNA ou MONIQUE`);
+                return "BRUNNA ou MONIQUE";
+            case "cobranca":
+                regras.push(`   → Cobrança → WAGNER ou BRUNNA`);
+                return "WAGNER ou BRUNNA";
+            case "judicial_simples":
+                regras.push(`   → Judicial simples → WAGNER ou BRUNNA ou MONIQUE`);
+                return "WAGNER ou BRUNNA ou MONIQUE";
+            default:
+                regras.push(`   → Sem critério claro → aplicar revezamento entre Grupos A e B (Manual p.7)`);
+                return "REVEZAMENTO ENTRE GRUPOS (A/B)";
         }
-        if (tipoDemanda === "resolucao_paciente") {
-            const gravidade = detectarGravidadePaciente(texto);
-            if (gravidade === "grave") {
-                regras.push(`   → Paciente grave → THEIVISON (Grupo A) ou GABRIELA (Grupo B)`);
-                return "THEIVISON ou GABRIELA";
-            }
-            regras.push(`   → Resolução paciente simples → BRUNNA ou MONIQUE`);
-            return "BRUNNA ou MONIQUE";
-        }
-        regras.push(`   → Sem critério claro → aplicar revezamento entre Grupos A e B (Manual p.7)`);
-        return "REVEZAMENTO ENTRE GRUPOS (A/B)";
     }
     
     // ==============================================================
@@ -470,7 +542,6 @@
             if (match) {
                 regras.push(`🔄 REGRA 1 (Continuidade): Identificado que já existe processo/contrato com ${match[0]}`);
                 regras.push(`   → Manual p.3 e p.5: Se já existe processo/contrato em andamento, vai para o MESMO advogado.`);
-                regras.push(`   → Manter advogado: ${match[0].toUpperCase()}`);
                 return { cliente: clienteInfo.nome, grupo: clienteInfo.grupo, advogado: match[0].toUpperCase(), isAssessorado: clienteInfo.isAssessorado, regras: regras, justificativa: `Continuidade determinada` };
             }
             regras.push(`⚠️ Mencionou continuidade mas não especificou advogado → verificar EasyJur.`);
